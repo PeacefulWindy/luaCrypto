@@ -1,0 +1,8 @@
+{
+    "name": "only-wolf-framework",
+    "version-semver": "1.0.0",
+  "dependencies": [
+    "cryptopp",
+    "lua"
+  ]
+}
