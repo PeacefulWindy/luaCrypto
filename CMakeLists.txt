@@ -30,13 +30,17 @@ else()
     link_directories(${VCPKG_INSTALL_ROOT}/lib)
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${VCPKG_INSTALL_ROOT}/include)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE})
 
 aux_source_directory(src srcs)
+aux_source_directory(src/util srcs)
+aux_source_directory(src/base64 srcs)
+aux_source_directory(src/rsa srcs)
+aux_source_directory(src/sha srcs)
 
 find_package(lua REQUIRED)
 find_package(cryptopp CONFIG REQUIRED)
