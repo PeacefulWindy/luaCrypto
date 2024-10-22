@@ -6,45 +6,46 @@
 #include<cryptopp/osrng.h>
 #include<cryptopp/files.h>
 #include <util/util.hpp>
+#include <util/util.hpp>
 
 int rsa_gen(lua_State* L)
 {
 	auto keyLen = luaL_checkinteger(L, 1);
-	auto publicKeyFilePath = luaL_checkstring(L, 2);
-	auto privateKeyFilePath = luaL_checkstring(L, 3);
 
 	auto rng = CryptoPP::AutoSeededRandomPool();
 	auto privateKey = CryptoPP::InvertibleRSAFunction();
-	privateKey.Initialize(rng, 1024);
+	privateKey.Initialize(rng, keyLen);
 
-	auto privateKeySink= CryptoPP::Base64Encoder(new CryptoPP::FileSink(privateKeyFilePath));
+	auto privateKeyData = std::string();
+	auto privateKeySink = CryptoPP::Base64Encoder(new CryptoPP::StringSink(privateKeyData));
 	privateKey.DEREncode(privateKeySink);
 	privateKeySink.MessageEnd();
 
 	auto publicKey = CryptoPP::RSAFunction(privateKey);
+	auto publicKeyData = std::string();
+	auto pulbicKeySink = CryptoPP::Base64Encoder(new CryptoPP::StringSink(publicKeyData));
+	publicKey.DEREncode(pulbicKeySink);
+	pulbicKeySink.MessageEnd();
 
-	auto publicKeySink = CryptoPP::Base64Encoder(new CryptoPP::FileSink(publicKeyFilePath));
-	publicKey.DEREncode(publicKeySink);
-	publicKeySink.MessageEnd();
+	lua_pushlstring(L, publicKeyData.c_str(), publicKeyData.length());
+	lua_pushlstring(L, privateKeyData.c_str(), privateKeyData.length());
 
-	return 0;
+	return 2;
 }
 
 int rsa_decode(lua_State* L)
 {
 	auto top = lua_gettop(L);
-	auto keyPath = luaL_checkstring(L, 1);
+	auto keyData = std::string(luaL_checkstring(L, 1));
 	auto input = luaL_checkstring(L, 2);
 	auto inputLen = luaL_checkinteger(L, 3);
 
 	auto key = CryptoPP::RSA::PrivateKey();
+	auto keySource = CryptoPP::StringSource(keyData, true, new CryptoPP::Base64Decoder);
+
 	try
 	{
-		auto bytes = CryptoPP::ByteQueue();
-		auto file = CryptoPP::FileSource(keyPath, true, new CryptoPP::Base64Decoder);
-		file.TransferAllTo(bytes);
-		bytes.MessageEnd();
-		key.Load(bytes);
+		key.BERDecode(keySource);
 	}
 	catch (const std::exception& e)
 	{
@@ -65,7 +66,7 @@ int rsa_decode(lua_State* L)
 int rsa_encode(lua_State* L)
 {
 	auto top = lua_gettop(L);
-	auto publicKeyPath = luaL_checkstring(L, 1);
+	auto keyData = std::string(luaL_checkstring(L, 1));
 	auto input = luaL_checkstring(L, 2);
 
 	auto inputLen = 0;
@@ -80,13 +81,11 @@ int rsa_encode(lua_State* L)
 	
 
 	auto key = CryptoPP::RSA::PublicKey();
+	auto keySource = CryptoPP::StringSource(keyData, true, new CryptoPP::Base64Decoder);
+
 	try
 	{
-		auto bytes = CryptoPP::ByteQueue();
-		auto file = CryptoPP::FileSource(publicKeyPath, true, new CryptoPP::Base64Decoder);
-		file.TransferAllTo(bytes);
-		bytes.MessageEnd();
-		key.Load(bytes);
+		key.BERDecode(keySource);
 	}
 	catch (const std::exception& e)
 	{

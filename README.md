@@ -24,13 +24,13 @@ local hash=crypto.sha3_256(needHashString)
 
 RSA
 ```
---生成(参考https://gist.github.com/TimSC/5251670)
+--生成
 local keyLen=2048--RSA长度
-crypto.rsa_gen(keyLen,_P.config.publicKey,_P.config.privateKey)
+local publicKey,privateKey=crypto.rsa_gen(keyLen)
 
---加密(参考https://cloud.tencent.com/developer/article/2366448)
-local hash=crypto.rsa_encode("xxx.pub",needHashString)
+--加密
+local hash=crypto.rsa_encode(publicKey,needHashString)
 
---解密（参考https://cloud.tencent.com/developer/article/2366448)
-local needHashString=crypto.rsa_decode("xxx.pem",hash,#hash)
+--解密
+local needHashString=crypto.rsa_decode(privateKey,hash,#hash)
 ```
