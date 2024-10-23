@@ -57,7 +57,15 @@ int rsa_decode(lua_State* L)
 	auto outputText = std::string();
 	auto rng = CryptoPP::AutoSeededRandomPool();
 
-	CryptoPP::StringSource((const CryptoPP::byte*)input, inputLen, true, new CryptoPP::PK_DecryptorFilter(rng, encryptor, new CryptoPP::StringSink(outputText)));
+	try
+	{
+		CryptoPP::StringSource((const CryptoPP::byte*)input, inputLen, true, new CryptoPP::PK_DecryptorFilter(rng, encryptor, new CryptoPP::StringSink(outputText)));
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 0;
+	}
 
 	lua_pushlstring(L, outputText.c_str(), outputText.length());
 	return 1;
@@ -78,7 +86,7 @@ int rsa_encode(lua_State* L)
 	{
 		inputLen = strlen(input);
 	}
-	
+
 
 	auto key = CryptoPP::RSA::PublicKey();
 	auto keySource = CryptoPP::StringSource(keyData, true, new CryptoPP::Base64Decoder);
@@ -96,8 +104,16 @@ int rsa_encode(lua_State* L)
 	auto encryptor = CryptoPP::RSAES_OAEP_SHA_Encryptor(key);
 	auto rng = CryptoPP::AutoSeededRandomPool();
 	auto outputText = std::string();
-	
-	CryptoPP::StringSource((const CryptoPP::byte*)input, inputLen, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(outputText)));
+
+	try
+	{
+		CryptoPP::StringSource((const CryptoPP::byte*)input, inputLen, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(outputText)));
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 0;
+	}
 
 	lua_pushlstring(L, outputText.c_str(), outputText.length());
 	return 1;

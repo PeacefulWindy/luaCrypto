@@ -13,6 +13,7 @@ static const struct luaL_Reg luaCryptoLib[] =
 
 	//SHA
 	{"sha3_256", sha3_256},
+	{"sha3_512", sha3_512},
 
 	//RSA
 	{"rsa_gen", rsa_gen},
